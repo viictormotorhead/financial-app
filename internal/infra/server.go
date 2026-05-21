@@ -10,7 +10,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	"github.com/viictormotorhead/financial-app/config"
+	"github.com/viictormotorhead/financial-app/internal/infra/config"
 )
 
 func NewEchoServer(lc fx.Lifecycle, logger *zap.Logger) *echo.Echo {

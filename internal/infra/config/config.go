@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 type Configuration struct {
 	Server Server
@@ -29,6 +33,8 @@ type App struct {
 var cfg Configuration
 
 func Load() error {
+	_ = godotenv.Load()
+
 	port := os.Getenv("HTTP_PORT")
 	if port == "" {
 		port = "8080"
@@ -52,7 +58,7 @@ func Load() error {
 		App: App{ServiceName: serviceName},
 		DB: DB{
 			Host:     envOrDefault("DB_HOST", "localhost"),
-			Port:     envOrDefault("DB_PORT", "5432"),
+			Port:     dbPort(),
 			User:     envOrDefault("DB_USER", "financial"),
 			Password: envOrDefault("DB_PASSWORD", "financial"),
 			Name:     envOrDefault("DB_NAME", "financial_app"),
@@ -73,4 +79,15 @@ func envOrDefault(key, fallback string) string {
 	}
 
 	return fallback
+}
+
+func dbPort() string {
+	if port := os.Getenv("DB_PORT"); port != "" {
+		return port
+	}
+	if port := os.Getenv("DB_HOST_PORT"); port != "" {
+		return port
+	}
+
+	return "15432"
 }

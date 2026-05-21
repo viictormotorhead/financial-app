@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/viictormotorhead/financial-app/config"
+	"github.com/viictormotorhead/financial-app/internal/infra/config"
 )
 
 const healthPath = "/health"
