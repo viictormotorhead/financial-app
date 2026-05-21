@@ -3,15 +3,12 @@ package gormrepo
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"gorm.io/gorm"
 
 	"github.com/viictormotorhead/financial-app/internal/application/investment/repositories"
 	"github.com/viictormotorhead/financial-app/internal/infra/repositories/investment/entities"
 )
-
-const movementTypeInitial = "initial"
 
 type investmentWriteRepository struct {
 	db *gorm.DB
@@ -24,10 +21,16 @@ func NewInvestmentWriteRepository(db *gorm.DB) repositories.InvestmentWriteRepos
 func (r *investmentWriteRepository) Save(ctx context.Context, investment entities.InvestmentEntity) (entities.InvestmentEntity, error) {
 	var saved entities.InvestmentEntity
 
+	tags := investment.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := entities.Investment{
 			Name:      investment.Name,
 			Balance:   investment.Balance,
+			Tags:      entities.StringList(tags),
 			CreatedAt: investment.CreatedAt,
 		}
 
@@ -37,9 +40,9 @@ func (r *investmentWriteRepository) Save(ctx context.Context, investment entitie
 
 		history := entities.InvestmentHistory{
 			InvestmentID: model.ID,
-			Date:         time.Now().UTC(),
+			Date:         investment.CreatedAt,
 			Amount:       investment.Balance,
-			MovementType: movementTypeInitial,
+			MovementType: entities.MovementTypeDeposit,
 		}
 
 		if err := tx.Create(&history).Error; err != nil {
@@ -50,6 +53,7 @@ func (r *investmentWriteRepository) Save(ctx context.Context, investment entitie
 			ID:        model.ID,
 			Name:      model.Name,
 			Balance:   model.Balance,
+			Tags:      model.Tags.Strings(),
 			CreatedAt: model.CreatedAt,
 		}
 

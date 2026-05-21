@@ -7,7 +7,7 @@ type InvestmentHistory struct {
 	InvestmentID   uint      `gorm:"not null;index"`
 	Date           time.Time `gorm:"not null"`
 	Amount         float64   `gorm:"type:double precision;not null"`
-	MovementType   string    `gorm:"type:varchar(50);not null;column:movement_type"`
+	MovementType   MovementType `gorm:"type:varchar(50);not null;column:movement_type"`
 }
 
 func (InvestmentHistory) TableName() string {

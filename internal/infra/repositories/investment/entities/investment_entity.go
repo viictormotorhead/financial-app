@@ -7,5 +7,6 @@ type InvestmentEntity struct {
 	ID        uint
 	Name      string
 	Balance   float64
+	Tags      []string
 	CreatedAt time.Time
 }
