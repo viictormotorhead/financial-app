@@ -5,7 +5,8 @@ import "time"
 type InvestmentResponse struct {
 	ID        uint      `json:"id"`
 	Name      string    `json:"name"`
-	Balance   float64   `json:"balance"`
-	Tags      []string  `json:"tags"`
+	Balance        float64   `json:"balance"`
+	InitialBalance float64   `json:"initial_balance"`
+	Tags           []string  `json:"tags"`
 	CreatedAt time.Time `json:"created_at"`
 }

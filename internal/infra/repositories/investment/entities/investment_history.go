@@ -6,7 +6,8 @@ type InvestmentHistory struct {
 	ID             uint      `gorm:"primaryKey"`
 	InvestmentID   uint      `gorm:"not null;index"`
 	Date           time.Time `gorm:"not null"`
-	Amount         float64   `gorm:"type:double precision;not null"`
+	Amount         float64      `gorm:"type:double precision;not null"`
+	BalanceAfter   float64      `gorm:"type:double precision;not null;column:balance_after"`
 	MovementType   MovementType `gorm:"type:varchar(50);not null;column:movement_type"`
 }
 

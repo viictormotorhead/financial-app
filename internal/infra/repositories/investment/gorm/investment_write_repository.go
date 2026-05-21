@@ -28,10 +28,11 @@ func (r *investmentWriteRepository) Save(ctx context.Context, investment entitie
 
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := entities.Investment{
-			Name:      investment.Name,
-			Balance:   investment.Balance,
-			Tags:      entities.StringList(tags),
-			CreatedAt: investment.CreatedAt,
+			Name:           investment.Name,
+			Balance:        investment.Balance,
+			InitialBalance: investment.InitialBalance,
+			Tags:           entities.StringList(tags),
+			CreatedAt:      investment.CreatedAt,
 		}
 
 		if err := tx.Create(&model).Error; err != nil {
@@ -42,6 +43,7 @@ func (r *investmentWriteRepository) Save(ctx context.Context, investment entitie
 			InvestmentID: model.ID,
 			Date:         investment.CreatedAt,
 			Amount:       investment.Balance,
+			BalanceAfter: investment.Balance,
 			MovementType: entities.MovementTypeDeposit,
 		}
 
@@ -50,11 +52,12 @@ func (r *investmentWriteRepository) Save(ctx context.Context, investment entitie
 		}
 
 		saved = entities.InvestmentEntity{
-			ID:        model.ID,
-			Name:      model.Name,
-			Balance:   model.Balance,
-			Tags:      model.Tags.Strings(),
-			CreatedAt: model.CreatedAt,
+			ID:             model.ID,
+			Name:           model.Name,
+			Balance:        model.Balance,
+			InitialBalance: model.InitialBalance,
+			Tags:           model.Tags.Strings(),
+			CreatedAt:      model.CreatedAt,
 		}
 
 		return nil

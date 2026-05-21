@@ -21,10 +21,10 @@ type CreateTagUseCaseIF interface {
 }
 
 type CreateTagUseCaseImpl struct {
-	repository repositories.TagWriteRepositoryIF
+	repository repositories.TagRepositoryIF
 }
 
-func NewCreateTagUseCase(repository repositories.TagWriteRepositoryIF) CreateTagUseCaseIF {
+func NewCreateTagUseCase(repository repositories.TagRepositoryIF) CreateTagUseCaseIF {
 	return &CreateTagUseCaseImpl{repository: repository}
 }
 
