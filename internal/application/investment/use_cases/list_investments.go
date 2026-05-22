@@ -53,7 +53,7 @@ func (u *ListInvestmentsUseCaseImpl) List(ctx context.Context, query ListInvestm
 			Investment:        inv.Name,
 			Amount:            inv.Balance,
 			Percentage:        roundToTwoDecimals(percentage),
-			PercentageGrowing: roundToTwoDecimals(percentageGrowing(inv.InitialBalance, inv.Balance)),
+			PercentageGrowing: roundToTwoDecimals(percentageGrowingFromEarnings(inv.InitialBalance, inv.EarningsTotal)),
 			Tags:              tags,
 		})
 	}
@@ -69,9 +69,9 @@ func roundToTwoDecimals(value float64) float64 {
 	return math.Round(value*100) / 100
 }
 
-func percentageGrowing(initialBalance, balance float64) float64 {
+func percentageGrowingFromEarnings(initialBalance, earningsTotal float64) float64 {
 	if initialBalance == 0 {
 		return 0
 	}
-	return ((balance - initialBalance) / initialBalance) * 100
+	return (earningsTotal / initialBalance) * 100
 }

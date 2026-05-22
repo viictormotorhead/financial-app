@@ -8,6 +8,7 @@ type InvestmentEntity struct {
 	Name      string
 	Balance        float64
 	InitialBalance float64
+	EarningsTotal  float64
 	Tags           []string
-	CreatedAt time.Time
+	CreatedAt      time.Time
 }
