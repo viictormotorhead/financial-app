@@ -15,23 +15,27 @@ import (
 
 type InvestmentHandlerIF interface {
 	Create(c echo.Context) error
+	List(c echo.Context) error
 	CreateMovement(c echo.Context) error
 	CreateValuation(c echo.Context) error
 }
 
 type InvestmentHandler struct {
 	createInvestment use_cases.CreateInvestmentUseCaseIF
+	listInvestments  use_cases.ListInvestmentsUseCaseIF
 	createMovement   use_cases.CreateMovementUseCaseIF
 	createValuation  use_cases.CreateValuationUseCaseIF
 }
 
 func NewInvestmentHandler(
 	createInvestment use_cases.CreateInvestmentUseCaseIF,
+	listInvestments use_cases.ListInvestmentsUseCaseIF,
 	createMovement use_cases.CreateMovementUseCaseIF,
 	createValuation use_cases.CreateValuationUseCaseIF,
 ) InvestmentHandlerIF {
 	return &InvestmentHandler{
 		createInvestment: createInvestment,
+		listInvestments:  listInvestments,
 		createMovement:   createMovement,
 		createValuation:  createValuation,
 	}

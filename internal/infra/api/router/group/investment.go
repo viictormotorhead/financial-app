@@ -11,6 +11,7 @@ type InvestmentRoutes struct{}
 
 func NewInvestmentRoutes(group *echo.Group, handler investment.InvestmentHandlerIF) *InvestmentRoutes {
 	routes := group.Group(InvestmentPathV1)
+	routes.GET("/", handler.List)
 	routes.POST("/", handler.Create)
 	routes.POST("/:id/movements", handler.CreateMovement)
 	routes.POST("/:id/valuations", handler.CreateValuation)

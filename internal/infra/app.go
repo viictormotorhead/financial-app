@@ -33,6 +33,7 @@ func Run() {
 		fx.Provide(investmentGorm.NewInvestmentWriteRepository),
 		fx.Provide(tagGorm.NewTagRepository),
 		fx.Provide(investmentUsecase.NewCreateInvestmentUseCase),
+		fx.Provide(investmentUsecase.NewListInvestmentsUseCase),
 		fx.Provide(investmentUsecase.NewCreateMovementUseCase),
 		fx.Provide(investmentUsecase.NewCreateValuationUseCase),
 		fx.Provide(tagUsecase.NewCreateTagUseCase),

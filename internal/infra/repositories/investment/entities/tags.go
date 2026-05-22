@@ -2,7 +2,7 @@ package entities
 
 import (
 	"database/sql/driver"
-	"errors"
+	"fmt"
 
 	"github.com/lib/pq"
 )
@@ -24,17 +24,32 @@ func (s *StringList) Scan(value interface{}) error {
 	}
 
 	var arr pq.StringArray
+
 	switch v := value.(type) {
-	case []byte:
-		return arr.Scan(string(v))
+	case []string:
+		*s = StringList(v)
+		return nil
+	case pq.StringArray:
+		*s = StringList(v)
+		return nil
 	case string:
-		return arr.Scan(v)
-	default:
-		if err := arr.Scan(value); err == nil {
-			*s = StringList(arr)
-			return nil
+		if err := arr.Scan(v); err != nil {
+			return err
 		}
-		return errors.New("unsupported tags column type")
+		*s = StringList(arr)
+		return nil
+	case []byte:
+		if err := arr.Scan(string(v)); err != nil {
+			return err
+		}
+		*s = StringList(arr)
+		return nil
+	default:
+		if err := arr.Scan(value); err != nil {
+			return fmt.Errorf("scan tags: unsupported type %T: %w", value, err)
+		}
+		*s = StringList(arr)
+		return nil
 	}
 }
 
