@@ -41,6 +41,24 @@ func (r *tagRepository) Save(ctx context.Context, tag entities.TagEntity) (entit
 	}, nil
 }
 
+func (r *tagRepository) ListAll(ctx context.Context) ([]entities.TagEntity, error) {
+	var tags []entities.Tag
+	if err := r.db.WithContext(ctx).Order("name ASC").Find(&tags).Error; err != nil {
+		return nil, fmt.Errorf("list tags: %w", err)
+	}
+
+	result := make([]entities.TagEntity, 0, len(tags))
+	for _, tag := range tags {
+		result = append(result, entities.TagEntity{
+			ID:          tag.ID,
+			Name:        tag.Name,
+			Description: tag.Description,
+		})
+	}
+
+	return result, nil
+}
+
 func (r *tagRepository) ResolveNames(ctx context.Context, names []string) ([]string, error) {
 	if len(names) == 0 {
 		return []string{}, nil

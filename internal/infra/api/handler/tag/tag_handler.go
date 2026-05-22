@@ -16,14 +16,22 @@ import (
 
 type TagHandlerIF interface {
 	Create(c echo.Context) error
+	List(c echo.Context) error
 }
 
 type TagHandler struct {
 	createTag use_cases.CreateTagUseCaseIF
+	listTags  use_cases.ListTagsUseCaseIF
 }
 
-func NewTagHandler(createTag use_cases.CreateTagUseCaseIF) TagHandlerIF {
-	return &TagHandler{createTag: createTag}
+func NewTagHandler(
+	createTag use_cases.CreateTagUseCaseIF,
+	listTags use_cases.ListTagsUseCaseIF,
+) TagHandlerIF {
+	return &TagHandler{
+		createTag: createTag,
+		listTags:  listTags,
+	}
 }
 
 func (h *TagHandler) Create(c echo.Context) error {

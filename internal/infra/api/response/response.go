@@ -11,6 +11,8 @@ const (
 	StatusError = "error"
 )
 
+// Envelope is the standard API response wrapper.
+// Data is the endpoint payload: a list, a single object, or null (e.g. health check).
 type Envelope struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`

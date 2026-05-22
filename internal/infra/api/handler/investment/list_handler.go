@@ -26,16 +26,15 @@ func (h *InvestmentHandler) List(c echo.Context) error {
 		}
 
 		items = append(items, response.InvestmentAllocationResponse{
-			Investment: item.Investment,
-			Amount:     item.Amount,
-			Percentage: item.Percentage,
-			Tags:       tags,
+			Investment:        item.Investment,
+			Amount:            item.Amount,
+			Percentage:        item.Percentage,
+			PercentageGrowing: item.PercentageGrowing,
+			Tags:              tags,
 		})
 	}
 
-	return apiresponse.OK(c, http.StatusOK, "investments retrieved successfully", map[string][]response.InvestmentAllocationResponse{
-		"investments": items,
-	})
+	return apiresponse.OK(c, http.StatusOK, "investments retrieved successfully", items)
 }
 
 func parseTagsQueryParam(c echo.Context) []string {

@@ -37,6 +37,7 @@ func Run() {
 		fx.Provide(investmentUsecase.NewCreateMovementUseCase),
 		fx.Provide(investmentUsecase.NewCreateValuationUseCase),
 		fx.Provide(tagUsecase.NewCreateTagUseCase),
+		fx.Provide(tagUsecase.NewListTagsUseCase),
 		fx.Provide(investment.NewInvestmentHandler),
 		fx.Provide(taghandler.NewTagHandler),
 		fx.Provide(group.NewHealthRoutes),

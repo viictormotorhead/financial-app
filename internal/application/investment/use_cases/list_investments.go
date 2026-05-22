@@ -50,10 +50,11 @@ func (u *ListInvestmentsUseCaseImpl) List(ctx context.Context, query ListInvestm
 		}
 
 		items = append(items, outputs.InvestmentAllocationDTO{
-			Investment: inv.Name,
-			Amount:     inv.Balance,
-			Percentage: roundToTwoDecimals(percentage),
-			Tags:       tags,
+			Investment:        inv.Name,
+			Amount:            inv.Balance,
+			Percentage:        roundToTwoDecimals(percentage),
+			PercentageGrowing: roundToTwoDecimals(percentageGrowing(inv.InitialBalance, inv.Balance)),
+			Tags:              tags,
 		})
 	}
 
@@ -66,4 +67,11 @@ func (u *ListInvestmentsUseCaseImpl) List(ctx context.Context, query ListInvestm
 
 func roundToTwoDecimals(value float64) float64 {
 	return math.Round(value*100) / 100
+}
+
+func percentageGrowing(initialBalance, balance float64) float64 {
+	if initialBalance == 0 {
+		return 0
+	}
+	return ((balance - initialBalance) / initialBalance) * 100
 }
