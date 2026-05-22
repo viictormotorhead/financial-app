@@ -11,6 +11,7 @@ import (
 	"github.com/viictormotorhead/financial-app/internal/application/investment/use_cases"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/request"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/response"
+	apiresponse "github.com/viictormotorhead/financial-app/internal/infra/api/response"
 	apivalidation "github.com/viictormotorhead/financial-app/internal/infra/api/validation"
 )
 
@@ -22,10 +23,7 @@ func (h *InvestmentHandler) CreateMovement(c echo.Context) error {
 
 	var req request.CreateMovementRequest
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, apivalidation.ErrorResponse{
-			Message: "invalid request body",
-			Errors:  []apivalidation.FieldError{{Field: "", Message: "request body must be valid JSON"}},
-		})
+		return apiresponse.Error(http.StatusBadRequest, "request body must be valid JSON")
 	}
 
 	if err := req.Validate(); err != nil {
@@ -41,35 +39,33 @@ func (h *InvestmentHandler) CreateMovement(c echo.Context) error {
 		return mapMovementError(err)
 	}
 
-	return c.JSON(http.StatusCreated, response.MovementResponse{
-		ID:           output.HistoryID,
-		InvestmentID: output.InvestmentID,
-		Type:         output.Type,
-		Amount:       output.Amount,
-		Balance:      output.Balance,
-		Date:         output.Date,
+	return apiresponse.OK(c, http.StatusCreated, "movement created successfully", map[string]response.MovementResponse{
+		"movement": {
+			ID:           output.HistoryID,
+			InvestmentID: output.InvestmentID,
+			Type:         output.Type,
+			Amount:       output.Amount,
+			Balance:      output.Balance,
+			Date:         output.Date,
+		},
 	})
 }
 
 func mapMovementError(err error) *echo.HTTPError {
 	switch {
 	case errors.Is(err, appinvestment.ErrInvestmentNotFound):
-		return echo.NewHTTPError(http.StatusNotFound, map[string]string{"message": err.Error()})
+		return apiresponse.Error(http.StatusNotFound, err.Error())
 	case errors.Is(err, appinvestment.ErrInsufficientBalance):
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, map[string]string{"message": err.Error()})
+		return apiresponse.Error(http.StatusUnprocessableEntity, err.Error())
 	default:
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]string{
-			"message": "could not create movement",
-		})
+		return apiresponse.Error(http.StatusInternalServerError, "could not create movement")
 	}
 }
 
 func parseInvestmentID(c echo.Context) (uint, error) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil || id == 0 {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, map[string]string{
-			"message": "invalid investment id",
-		})
+		return 0, apiresponse.Error(http.StatusBadRequest, "invalid investment id")
 	}
 	return uint(id), nil
 }

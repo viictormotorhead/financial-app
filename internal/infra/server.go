@@ -10,11 +10,13 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
+	"github.com/viictormotorhead/financial-app/internal/infra/api/response"
 	"github.com/viictormotorhead/financial-app/internal/infra/config"
 )
 
 func NewEchoServer(lc fx.Lifecycle, logger *zap.Logger) *echo.Echo {
 	e := echo.New()
+	e.HTTPErrorHandler = response.HTTPErrorHandler
 	e.HideBanner = true
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())

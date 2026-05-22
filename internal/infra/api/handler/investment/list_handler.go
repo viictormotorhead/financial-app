@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/use_cases"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/response"
+	apiresponse "github.com/viictormotorhead/financial-app/internal/infra/api/response"
 )
 
 func (h *InvestmentHandler) List(c echo.Context) error {
@@ -14,9 +15,7 @@ func (h *InvestmentHandler) List(c echo.Context) error {
 		Tags: parseTagsQueryParam(c),
 	})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]string{
-			"message": "could not list investments",
-		})
+		return apiresponse.Error(http.StatusInternalServerError, "could not list investments")
 	}
 
 	items := make([]response.InvestmentAllocationResponse, 0, len(output.Items))
@@ -34,7 +33,9 @@ func (h *InvestmentHandler) List(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, items)
+	return apiresponse.OK(c, http.StatusOK, "investments retrieved successfully", map[string][]response.InvestmentAllocationResponse{
+		"investments": items,
+	})
 }
 
 func parseTagsQueryParam(c echo.Context) []string {

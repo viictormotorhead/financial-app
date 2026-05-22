@@ -9,7 +9,8 @@ import (
 	apptag "github.com/viictormotorhead/financial-app/internal/application/tag"
 	"github.com/viictormotorhead/financial-app/internal/application/tag/use_cases"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/tag/dto/request"
-	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/tag/dto/response"
+	tagresponse "github.com/viictormotorhead/financial-app/internal/infra/api/handler/tag/dto/response"
+	"github.com/viictormotorhead/financial-app/internal/infra/api/response"
 	apivalidation "github.com/viictormotorhead/financial-app/internal/infra/api/validation"
 )
 
@@ -28,10 +29,7 @@ func NewTagHandler(createTag use_cases.CreateTagUseCaseIF) TagHandlerIF {
 func (h *TagHandler) Create(c echo.Context) error {
 	var req request.CreateTagRequest
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, apivalidation.ErrorResponse{
-			Message: "invalid request body",
-			Errors:  []apivalidation.FieldError{{Field: "", Message: "request body must be valid JSON"}},
-		})
+		return response.Error(http.StatusBadRequest, "request body must be valid JSON")
 	}
 
 	if err := req.Validate(); err != nil {
@@ -44,18 +42,16 @@ func (h *TagHandler) Create(c echo.Context) error {
 	})
 	if err != nil {
 		if errors.Is(err, apptag.ErrTagNameAlreadyExists) {
-			return echo.NewHTTPError(http.StatusConflict, map[string]string{
-				"message": err.Error(),
-			})
+			return response.Error(http.StatusConflict, err.Error())
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]string{
-			"message": "could not create tag",
-		})
+		return response.Error(http.StatusInternalServerError, "could not create tag")
 	}
 
-	return c.JSON(http.StatusCreated, response.TagResponse{
-		ID:          output.ID,
-		Name:        output.Name,
-		Description: output.Description,
+	return response.OK(c, http.StatusCreated, "tag created successfully", map[string]tagresponse.TagResponse{
+		"tag": {
+			ID:          output.ID,
+			Name:        output.Name,
+			Description: output.Description,
+		},
 	})
 }

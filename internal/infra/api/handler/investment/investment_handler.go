@@ -9,7 +9,8 @@ import (
 	apptag "github.com/viictormotorhead/financial-app/internal/application/tag"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/use_cases"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/request"
-	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/response"
+	investmentresponse "github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/response"
+	"github.com/viictormotorhead/financial-app/internal/infra/api/response"
 	apivalidation "github.com/viictormotorhead/financial-app/internal/infra/api/validation"
 )
 
@@ -44,10 +45,7 @@ func NewInvestmentHandler(
 func (h *InvestmentHandler) Create(c echo.Context) error {
 	var req request.CreateInvestmentRequest
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, apivalidation.ErrorResponse{
-			Message: "invalid request body",
-			Errors:  []apivalidation.FieldError{{Field: "", Message: "request body must be valid JSON"}},
-		})
+		return response.Error(http.StatusBadRequest, "request body must be valid JSON")
 	}
 
 	if err := req.Validate(); err != nil {
@@ -62,14 +60,9 @@ func (h *InvestmentHandler) Create(c echo.Context) error {
 	if err != nil {
 		var tagsNotFound *apptag.TagsNotFoundError
 		if errors.As(err, &tagsNotFound) {
-			return echo.NewHTTPError(http.StatusUnprocessableEntity, map[string]interface{}{
-				"message": tagsNotFound.Error(),
-				"tags":    tagsNotFound.Missing,
-			})
+			return response.Error(http.StatusUnprocessableEntity, tagsNotFound.Error())
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, map[string]string{
-			"message": "could not create investment",
-		})
+		return response.Error(http.StatusInternalServerError, "could not create investment")
 	}
 
 	tags := output.Tags
@@ -77,12 +70,14 @@ func (h *InvestmentHandler) Create(c echo.Context) error {
 		tags = []string{}
 	}
 
-	return c.JSON(http.StatusCreated, response.InvestmentResponse{
-		ID:             output.ID,
-		Name:           output.Name,
-		Balance:        output.Balance,
-		InitialBalance: output.InitialBalance,
-		Tags:           tags,
-		CreatedAt:      output.CreatedAt,
+	return response.OK(c, http.StatusCreated, "investment created successfully", map[string]investmentresponse.InvestmentResponse{
+		"investment": {
+			ID:             output.ID,
+			Name:           output.Name,
+			Balance:        output.Balance,
+			InitialBalance: output.InitialBalance,
+			Tags:           tags,
+			CreatedAt:      output.CreatedAt,
+		},
 	})
 }

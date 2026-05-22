@@ -1,10 +1,14 @@
 package validation
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/labstack/echo/v4"
+
+	"github.com/viictormotorhead/financial-app/internal/infra/api/response"
 )
 
 type FieldError struct {
@@ -20,10 +24,7 @@ type ErrorResponse struct {
 func HTTPError(err error) *echo.HTTPError {
 	errs, ok := err.(validation.Errors)
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{
-			Message: "invalid request",
-			Errors:  []FieldError{{Field: "", Message: err.Error()}},
-		})
+		return response.Error(http.StatusBadRequest, err.Error())
 	}
 
 	fields := make([]FieldError, 0, len(errs))
@@ -37,8 +38,32 @@ func HTTPError(err error) *echo.HTTPError {
 		})
 	}
 
-	return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{
+	return response.Error(http.StatusBadRequest, formatMessage(ErrorResponse{
 		Message: "validation failed",
 		Errors:  fields,
-	})
+	}))
+}
+
+func formatMessage(resp ErrorResponse) string {
+	if len(resp.Errors) == 0 {
+		if resp.Message != "" {
+			return resp.Message
+		}
+		return "validation failed"
+	}
+
+	parts := make([]string, 0, len(resp.Errors))
+	for _, fieldErr := range resp.Errors {
+		if fieldErr.Field == "" {
+			parts = append(parts, fieldErr.Message)
+			continue
+		}
+		parts = append(parts, fmt.Sprintf("%s: %s", fieldErr.Field, fieldErr.Message))
+	}
+
+	if resp.Message != "" {
+		return fmt.Sprintf("%s (%s)", resp.Message, strings.Join(parts, "; "))
+	}
+
+	return strings.Join(parts, "; ")
 }
