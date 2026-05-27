@@ -26,6 +26,7 @@ func (h *InvestmentHandler) List(c echo.Context) error {
 		}
 
 		items = append(items, response.InvestmentAllocationResponse{
+			ID:                item.ID,
 			Investment:        item.Investment,
 			Amount:            item.Amount,
 			Percentage:        item.Percentage,

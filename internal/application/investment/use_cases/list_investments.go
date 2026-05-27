@@ -50,16 +50,31 @@ func (u *ListInvestmentsUseCaseImpl) List(ctx context.Context, query ListInvestm
 		}
 
 		items = append(items, outputs.InvestmentAllocationDTO{
+			ID:                inv.ID,
 			Investment:        inv.Name,
 			Amount:            inv.Balance,
 			Percentage:        roundToTwoDecimals(percentage),
-			PercentageGrowing: roundToTwoDecimals(percentageGrowingFromEarnings(inv.InitialBalance, inv.EarningsTotal)),
+			PercentageGrowing: roundToTwoDecimals(percentageGrowingFromEarnings(inv.Balance, inv.EarningsTotal)),
 			Tags:              tags,
 		})
 	}
 
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Amount > items[j].Amount
+		gi := items[i].PercentageGrowing
+		gj := items[j].PercentageGrowing
+
+		// NaN should never happen, but if it does, push it to the bottom.
+		if math.IsNaN(gi) {
+			gi = math.Inf(-1)
+		}
+		if math.IsNaN(gj) {
+			gj = math.Inf(-1)
+		}
+
+		if gi == gj {
+			return items[i].Amount > items[j].Amount
+		}
+		return gi > gj
 	})
 
 	return outputs.ListInvestmentsOutputDTO{Items: items}, nil
@@ -69,9 +84,11 @@ func roundToTwoDecimals(value float64) float64 {
 	return math.Round(value*100) / 100
 }
 
-func percentageGrowingFromEarnings(initialBalance, earningsTotal float64) float64 {
-	if initialBalance == 0 {
+// Rendimiento por valuaciones: suma de earnings vs capital invertido (balance sin earnings).
+func percentageGrowingFromEarnings(balance, earningsTotal float64) float64 {
+	investedCapital := balance - earningsTotal
+	if investedCapital == 0 {
 		return 0
 	}
-	return (earningsTotal / initialBalance) * 100
+	return (earningsTotal / investedCapital) * 100
 }

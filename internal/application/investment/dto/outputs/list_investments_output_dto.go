@@ -1,6 +1,7 @@
 package outputs
 
 type InvestmentAllocationDTO struct {
+	ID                 uint
 	Investment         string
 	Amount             float64
 	Percentage         float64
