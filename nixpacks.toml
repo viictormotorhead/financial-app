@@ -1,0 +1,6 @@
+# Nixpacks (Dockploy) — compile the Go binary during build, then run it.
+[phases.build]
+cmds = ["go build -ldflags='-s -w' -o out ./cmd/main.go"]
+
+[start]
+cmd = "./out"
