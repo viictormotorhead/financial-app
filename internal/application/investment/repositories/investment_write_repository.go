@@ -12,4 +12,6 @@ type InvestmentWriteRepositoryIF interface {
 	RecordMovement(ctx context.Context, input entities.RecordMovementInput) (entities.MovementResult, error)
 	RecordValuation(ctx context.Context, input entities.RecordValuationInput) (entities.ValuationResult, error)
 	List(ctx context.Context, tagNames []string) ([]entities.InvestmentEntity, error)
+	ListHistoryByInvestmentID(ctx context.Context, investmentID uint) ([]entities.InvestmentHistoryEntity, error)
+	SumEarningsByInvestmentID(ctx context.Context, investmentID uint) (float64, error)
 }
