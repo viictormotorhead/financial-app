@@ -21,6 +21,15 @@ func NewEchoServer(lc fx.Lifecycle, logger *zap.Logger) *echo.Echo {
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPatch,
+			http.MethodOptions,
+		},
+	}))
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
