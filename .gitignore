@@ -1,6 +1,5 @@
 # Binaries
 bin/
-out
 *.exe
 *.exe~
 *.dll
