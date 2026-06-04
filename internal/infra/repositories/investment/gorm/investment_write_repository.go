@@ -28,6 +28,7 @@ func (r *investmentWriteRepository) Save(ctx context.Context, investment entitie
 
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		model := entities.Investment{
+			UserID:         investment.UserID,
 			Name:           investment.Name,
 			Balance:        investment.Balance,
 			InitialBalance: investment.InitialBalance,

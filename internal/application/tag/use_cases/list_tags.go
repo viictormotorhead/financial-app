@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/viictormotorhead/financial-app/internal/application/auth"
 	"github.com/viictormotorhead/financial-app/internal/application/tag/dto/outputs"
 	"github.com/viictormotorhead/financial-app/internal/application/tag/repositories"
 )
@@ -21,7 +22,12 @@ func NewListTagsUseCase(repository repositories.TagRepositoryIF) ListTagsUseCase
 }
 
 func (u *ListTagsUseCaseImpl) List(ctx context.Context) (outputs.ListTagsOutputDTO, error) {
-	tags, err := u.repository.ListAll(ctx)
+	userID, err := auth.RequireUserID(ctx)
+	if err != nil {
+		return outputs.ListTagsOutputDTO{}, err
+	}
+
+	tags, err := u.repository.ListAll(ctx, userID)
 	if err != nil {
 		return outputs.ListTagsOutputDTO{}, fmt.Errorf("list tags: %w", err)
 	}

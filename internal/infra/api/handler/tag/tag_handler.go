@@ -8,6 +8,7 @@ import (
 
 	apptag "github.com/viictormotorhead/financial-app/internal/application/tag"
 	"github.com/viictormotorhead/financial-app/internal/application/tag/use_cases"
+	apihandler "github.com/viictormotorhead/financial-app/internal/infra/api/handler"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/tag/dto/request"
 	tagresponse "github.com/viictormotorhead/financial-app/internal/infra/api/handler/tag/dto/response"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/response"
@@ -49,6 +50,9 @@ func (h *TagHandler) Create(c echo.Context) error {
 		Description: req.Description,
 	})
 	if err != nil {
+		if httpErr := apihandler.HTTPErrorFromUseCase(err); httpErr != nil {
+			return httpErr
+		}
 		if errors.Is(err, apptag.ErrTagNameAlreadyExists) {
 			return response.Error(http.StatusConflict, err.Error())
 		}

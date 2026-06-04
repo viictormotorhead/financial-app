@@ -2,6 +2,8 @@ package config
 
 import (
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -10,6 +12,13 @@ type Configuration struct {
 	Server Server
 	App    App
 	DB     DB
+	Auth   Auth
+}
+
+type Auth struct {
+	JWTSecret  string
+	JWTExpiry  time.Duration
+	BcryptCost int
 }
 
 type DB struct {
@@ -56,6 +65,11 @@ func Load() error {
 			BasePath: basePath,
 		},
 		App: App{ServiceName: serviceName},
+		Auth: Auth{
+			JWTSecret:  envOrDefault("JWT_SECRET", "dev-insecure-change-me"),
+			JWTExpiry:  jwtExpiry(),
+			BcryptCost: bcryptCost(),
+		},
 		DB: DB{
 			Host:     envOrDefault("DB_HOST", "localhost"),
 			Port:     dbPort(),
@@ -79,6 +93,24 @@ func envOrDefault(key, fallback string) string {
 	}
 
 	return fallback
+}
+
+func jwtExpiry() time.Duration {
+	raw := envOrDefault("JWT_EXPIRY", "24h")
+	d, err := time.ParseDuration(raw)
+	if err != nil {
+		return 24 * time.Hour
+	}
+	return d
+}
+
+func bcryptCost() int {
+	raw := envOrDefault("BCRYPT_COST", "12")
+	cost, err := strconv.Atoi(raw)
+	if err != nil || cost < 4 {
+		return 12
+	}
+	return cost
 }
 
 func dbPort() string {

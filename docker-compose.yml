@@ -1,4 +1,22 @@
 services:
+  migrate:
+    image: migrate/migrate:v4.18.3
+    container_name: financial-app-migrate
+    volumes:
+      - ./migrations:/migrations:ro
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://financial:financial@postgres:5432/financial_app?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   postgres:
     image: postgres:16-alpine
     container_name: financial-app-postgres

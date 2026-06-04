@@ -9,6 +9,7 @@ import (
 
 	appinvestment "github.com/viictormotorhead/financial-app/internal/application/investment"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/use_cases"
+	apihandler "github.com/viictormotorhead/financial-app/internal/infra/api/handler"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/response"
 	apiresponse "github.com/viictormotorhead/financial-app/internal/infra/api/response"
 )
@@ -23,6 +24,9 @@ func (h *InvestmentHandler) GetByID(c echo.Context) error {
 		InvestmentID: investmentID,
 	})
 	if err != nil {
+		if httpErr := apihandler.HTTPErrorFromUseCase(err); httpErr != nil {
+			return httpErr
+		}
 		if errors.Is(err, appinvestment.ErrInvestmentNotFound) {
 			return apiresponse.Error(http.StatusNotFound, err.Error())
 		}

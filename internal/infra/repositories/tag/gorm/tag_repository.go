@@ -11,6 +11,7 @@ import (
 	apptag "github.com/viictormotorhead/financial-app/internal/application/tag"
 	"github.com/viictormotorhead/financial-app/internal/application/tag/repositories"
 	"github.com/viictormotorhead/financial-app/internal/infra/repositories/tag/entities"
+	"github.com/viictormotorhead/financial-app/internal/infra/repositories/scopes"
 )
 
 type tagRepository struct {
@@ -23,6 +24,7 @@ func NewTagRepository(db *gorm.DB) repositories.TagRepositoryIF {
 
 func (r *tagRepository) Save(ctx context.Context, tag entities.TagEntity) (entities.TagEntity, error) {
 	model := entities.Tag{
+		UserID:      tag.UserID,
 		Name:        tag.Name,
 		Description: tag.Description,
 	}
@@ -36,14 +38,15 @@ func (r *tagRepository) Save(ctx context.Context, tag entities.TagEntity) (entit
 
 	return entities.TagEntity{
 		ID:          model.ID,
+		UserID:      model.UserID,
 		Name:        model.Name,
 		Description: model.Description,
 	}, nil
 }
 
-func (r *tagRepository) ListAll(ctx context.Context) ([]entities.TagEntity, error) {
+func (r *tagRepository) ListAll(ctx context.Context, userID string) ([]entities.TagEntity, error) {
 	var tags []entities.Tag
-	if err := r.db.WithContext(ctx).Order("name ASC").Find(&tags).Error; err != nil {
+	if err := scopes.UserID(r.db.WithContext(ctx), userID).Order("name ASC").Find(&tags).Error; err != nil {
 		return nil, fmt.Errorf("list tags: %w", err)
 	}
 
@@ -51,6 +54,7 @@ func (r *tagRepository) ListAll(ctx context.Context) ([]entities.TagEntity, erro
 	for _, tag := range tags {
 		result = append(result, entities.TagEntity{
 			ID:          tag.ID,
+			UserID:      tag.UserID,
 			Name:        tag.Name,
 			Description: tag.Description,
 		})
@@ -59,7 +63,7 @@ func (r *tagRepository) ListAll(ctx context.Context) ([]entities.TagEntity, erro
 	return result, nil
 }
 
-func (r *tagRepository) ResolveNames(ctx context.Context, names []string) ([]string, error) {
+func (r *tagRepository) ResolveNames(ctx context.Context, userID string, names []string) ([]string, error) {
 	if len(names) == 0 {
 		return []string{}, nil
 	}
@@ -83,7 +87,7 @@ func (r *tagRepository) ResolveNames(ctx context.Context, names []string) ([]str
 	}
 
 	var tags []entities.Tag
-	if err := r.db.WithContext(ctx).
+	if err := scopes.UserID(r.db.WithContext(ctx), userID).
 		Where("LOWER(name) IN ?", keys).
 		Find(&tags).Error; err != nil {
 		return nil, fmt.Errorf("find tags: %w", err)

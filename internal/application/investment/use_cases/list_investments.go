@@ -6,6 +6,7 @@ import (
 	"math"
 	"sort"
 
+	"github.com/viictormotorhead/financial-app/internal/application/auth"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/dto/outputs"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/repositories"
 )
@@ -27,7 +28,12 @@ func NewListInvestmentsUseCase(repository repositories.InvestmentWriteRepository
 }
 
 func (u *ListInvestmentsUseCaseImpl) List(ctx context.Context, query ListInvestmentsQuery) (outputs.ListInvestmentsOutputDTO, error) {
-	investments, err := u.repository.List(ctx, normalizeTags(query.Tags))
+	userID, err := auth.RequireUserID(ctx)
+	if err != nil {
+		return outputs.ListInvestmentsOutputDTO{}, err
+	}
+
+	investments, err := u.repository.List(ctx, userID, normalizeTags(query.Tags))
 	if err != nil {
 		return outputs.ListInvestmentsOutputDTO{}, fmt.Errorf("list investments: %w", err)
 	}

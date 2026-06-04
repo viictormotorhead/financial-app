@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/viictormotorhead/financial-app/internal/application/auth"
 	appinvestment "github.com/viictormotorhead/financial-app/internal/application/investment"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/dto/outputs"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/repositories"
@@ -30,7 +31,12 @@ func NewCreateMovementUseCase(repository repositories.InvestmentWriteRepositoryI
 }
 
 func (u *CreateMovementUseCaseImpl) Create(ctx context.Context, cmd CreateMovementCommand) (outputs.CreateMovementOutputDTO, error) {
-	investment, err := u.repository.FindByID(ctx, cmd.InvestmentID)
+	userID, err := auth.RequireUserID(ctx)
+	if err != nil {
+		return outputs.CreateMovementOutputDTO{}, err
+	}
+
+	investment, err := u.repository.FindByID(ctx, userID, cmd.InvestmentID)
 	if err != nil {
 		if errors.Is(err, appinvestment.ErrInvestmentNotFound) {
 			return outputs.CreateMovementOutputDTO{}, err

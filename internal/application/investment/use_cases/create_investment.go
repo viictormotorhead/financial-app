@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/viictormotorhead/financial-app/internal/application/auth"
 	apptag "github.com/viictormotorhead/financial-app/internal/application/tag"
 	tagrepositories "github.com/viictormotorhead/financial-app/internal/application/tag/repositories"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/dto/outputs"
@@ -40,10 +41,15 @@ func NewCreateInvestmentUseCase(
 }
 
 func (u *CreateInvestmentUseCaseImpl) Create(ctx context.Context, cmd CreateInvestmentCommand) (outputs.CreateInvestmentOutputDTO, error) {
+	userID, err := auth.RequireUserID(ctx)
+	if err != nil {
+		return outputs.CreateInvestmentOutputDTO{}, err
+	}
+
 	tags := normalizeTags(cmd.Tags)
 
 	if len(tags) > 0 {
-		resolved, err := u.tagRepository.ResolveNames(ctx, tags)
+		resolved, err := u.tagRepository.ResolveNames(ctx, userID, tags)
 		if err != nil {
 			var tagsNotFound *apptag.TagsNotFoundError
 			if errors.As(err, &tagsNotFound) {
@@ -55,6 +61,7 @@ func (u *CreateInvestmentUseCaseImpl) Create(ctx context.Context, cmd CreateInve
 	}
 
 	entity := entities.InvestmentEntity{
+		UserID:         auth.UserIDPtr(userID),
 		Name:           cmd.Name,
 		Balance:        cmd.Balance,
 		InitialBalance: cmd.Balance,

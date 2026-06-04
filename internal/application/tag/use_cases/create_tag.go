@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/viictormotorhead/financial-app/internal/application/auth"
 	apptag "github.com/viictormotorhead/financial-app/internal/application/tag"
 	"github.com/viictormotorhead/financial-app/internal/application/tag/dto/outputs"
 	"github.com/viictormotorhead/financial-app/internal/application/tag/repositories"
@@ -29,7 +30,13 @@ func NewCreateTagUseCase(repository repositories.TagRepositoryIF) CreateTagUseCa
 }
 
 func (u *CreateTagUseCaseImpl) Create(ctx context.Context, cmd CreateTagCommand) (outputs.CreateTagOutputDTO, error) {
+	userID, err := auth.RequireUserID(ctx)
+	if err != nil {
+		return outputs.CreateTagOutputDTO{}, err
+	}
+
 	entity := entities.TagEntity{
+		UserID:      auth.UserIDPtr(userID),
 		Name:        cmd.Name,
 		Description: cmd.Description,
 	}

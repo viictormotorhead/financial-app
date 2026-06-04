@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	apptag "github.com/viictormotorhead/financial-app/internal/application/tag"
+	apihandler "github.com/viictormotorhead/financial-app/internal/infra/api/handler"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/use_cases"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/request"
 	investmentresponse "github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/response"
@@ -62,6 +63,9 @@ func (h *InvestmentHandler) Create(c echo.Context) error {
 		Tags:    req.Tags,
 	})
 	if err != nil {
+		if httpErr := apihandler.HTTPErrorFromUseCase(err); httpErr != nil {
+			return httpErr
+		}
 		var tagsNotFound *apptag.TagsNotFoundError
 		if errors.As(err, &tagsNotFound) {
 			return response.Error(http.StatusUnprocessableEntity, tagsNotFound.Error())

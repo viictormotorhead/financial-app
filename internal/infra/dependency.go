@@ -1,7 +1,14 @@
 package infra
 
-import "github.com/labstack/echo/v4"
+import (
+	"github.com/labstack/echo/v4"
 
-func NewEchoGroup(echoServer *echo.Echo) *echo.Group {
-	return echoServer.Group("/api")
+	appauth "github.com/viictormotorhead/financial-app/internal/application/auth"
+	"github.com/viictormotorhead/financial-app/internal/infra/api/middleware"
+)
+
+func NewEchoGroup(echoServer *echo.Echo, tokenParser appauth.TokenParser) *echo.Group {
+	api := echoServer.Group("/api")
+	api.Use(middleware.JWTAuth(tokenParser))
+	return api
 }

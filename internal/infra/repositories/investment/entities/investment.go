@@ -4,6 +4,7 @@ import "time"
 
 type Investment struct {
 	ID        uint      `gorm:"primaryKey"`
+	UserID    *string   `gorm:"type:varchar(21);index"`
 	Name      string    `gorm:"type:varchar(255);not null"`
 	Balance        float64    `gorm:"type:double precision;not null;default:0"`
 	InitialBalance float64    `gorm:"type:double precision;not null;column:initial_balance"`

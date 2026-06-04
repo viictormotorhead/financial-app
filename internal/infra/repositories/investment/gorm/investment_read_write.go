@@ -11,11 +11,12 @@ import (
 
 	appinvestment "github.com/viictormotorhead/financial-app/internal/application/investment"
 	"github.com/viictormotorhead/financial-app/internal/infra/repositories/investment/entities"
+	"github.com/viictormotorhead/financial-app/internal/infra/repositories/scopes"
 )
 
-func (r *investmentWriteRepository) FindByID(ctx context.Context, id uint) (entities.InvestmentEntity, error) {
+func (r *investmentWriteRepository) FindByID(ctx context.Context, userID string, id uint) (entities.InvestmentEntity, error) {
 	var model entities.Investment
-	if err := r.db.WithContext(ctx).First(&model, id).Error; err != nil {
+	if err := scopes.UserID(r.db.WithContext(ctx), userID).First(&model, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entities.InvestmentEntity{}, appinvestment.ErrInvestmentNotFound
 		}
@@ -125,6 +126,7 @@ func (r *investmentWriteRepository) RecordValuation(ctx context.Context, input e
 func toInvestmentEntity(model entities.Investment) entities.InvestmentEntity {
 	return entities.InvestmentEntity{
 		ID:             model.ID,
+		UserID:         model.UserID,
 		Name:           model.Name,
 		Balance:        model.Balance,
 		InitialBalance: model.InitialBalance,

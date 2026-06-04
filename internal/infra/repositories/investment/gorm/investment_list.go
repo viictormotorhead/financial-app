@@ -6,11 +6,12 @@ import (
 	"strings"
 
 	"github.com/viictormotorhead/financial-app/internal/infra/repositories/investment/entities"
+	"github.com/viictormotorhead/financial-app/internal/infra/repositories/scopes"
 )
 
-func (r *investmentWriteRepository) List(ctx context.Context, tagNames []string) ([]entities.InvestmentEntity, error) {
+func (r *investmentWriteRepository) List(ctx context.Context, userID string, tagNames []string) ([]entities.InvestmentEntity, error) {
 	var models []entities.Investment
-	query := r.db.WithContext(ctx).Model(&entities.Investment{})
+	query := scopes.UserID(r.db.WithContext(ctx).Model(&entities.Investment{}), userID)
 
 	if len(tagNames) > 0 {
 		keys := make([]string, len(tagNames))
@@ -78,3 +79,4 @@ func (r *investmentWriteRepository) sumEarningsByInvestmentIDs(ctx context.Conte
 
 	return earningsByID, nil
 }
+

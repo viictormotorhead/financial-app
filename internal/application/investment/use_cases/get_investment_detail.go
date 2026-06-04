@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/viictormotorhead/financial-app/internal/application/auth"
 	appinvestment "github.com/viictormotorhead/financial-app/internal/application/investment"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/dto/outputs"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/repositories"
@@ -29,7 +30,12 @@ func NewGetInvestmentDetailUseCase(repository repositories.InvestmentWriteReposi
 }
 
 func (u *GetInvestmentDetailUseCaseImpl) Get(ctx context.Context, query GetInvestmentDetailQuery) (outputs.GetInvestmentDetailOutputDTO, error) {
-	investment, err := u.repository.FindByID(ctx, query.InvestmentID)
+	userID, err := auth.RequireUserID(ctx)
+	if err != nil {
+		return outputs.GetInvestmentDetailOutputDTO{}, err
+	}
+
+	investment, err := u.repository.FindByID(ctx, userID, query.InvestmentID)
 	if err != nil {
 		if errors.Is(err, appinvestment.ErrInvestmentNotFound) {
 			return outputs.GetInvestmentDetailOutputDTO{}, err

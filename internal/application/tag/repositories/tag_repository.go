@@ -8,6 +8,6 @@ import (
 
 type TagRepositoryIF interface {
 	Save(ctx context.Context, tag entities.TagEntity) (entities.TagEntity, error)
-	ListAll(ctx context.Context) ([]entities.TagEntity, error)
-	ResolveNames(ctx context.Context, names []string) ([]string, error)
+	ListAll(ctx context.Context, userID string) ([]entities.TagEntity, error)
+	ResolveNames(ctx context.Context, userID string, names []string) ([]string, error)
 }

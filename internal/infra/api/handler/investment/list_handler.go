@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/viictormotorhead/financial-app/internal/application/investment/use_cases"
+	apihandler "github.com/viictormotorhead/financial-app/internal/infra/api/handler"
 	"github.com/viictormotorhead/financial-app/internal/infra/api/handler/investment/dto/response"
 	apiresponse "github.com/viictormotorhead/financial-app/internal/infra/api/response"
 )
@@ -15,6 +16,9 @@ func (h *InvestmentHandler) List(c echo.Context) error {
 		Tags: parseTagsQueryParam(c),
 	})
 	if err != nil {
+		if httpErr := apihandler.HTTPErrorFromUseCase(err); httpErr != nil {
+			return httpErr
+		}
 		return apiresponse.Error(http.StatusInternalServerError, "could not list investments")
 	}
 
