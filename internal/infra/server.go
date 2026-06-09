@@ -18,6 +18,7 @@ func NewEchoServer(lc fx.Lifecycle, logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.HTTPErrorHandler = response.HTTPErrorHandler
 	e.HideBanner = true
+	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
